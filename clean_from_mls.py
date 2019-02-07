@@ -17,16 +17,8 @@ import matplotlib.pyplot as plt
 import io
 import seaborn as sns
 
-
-# In[2]:
-
-
 # for single 
 data = pd.read_csv('data_to_combine/11-2-18_with_lat_long_needs_cleaning.csv')
-
-
-# In[4]:
-
 
 # for multiple csv loads
 # pull all the data csv files taken from the mls
@@ -161,44 +153,24 @@ for i in range(len(col)):
             'lon' : 0
     })
 
-
-# In[73]:
-
-
 len(geo_data['loc'])
 
-
-# In[75]:
-
-
 geo_data['loc']
-
-
-# In[76]:
 
 
 loc_data = pd.DataFrame(geo_data['loc'], columns=['lat', 'lon'])
 loc_data.head()
 
 
-# In[77]:
-
 
 # join the lats and lons to the master df
 data.join(loc_data)
 
 
-# In[78]:
-
 
 # if the above works do it for real
 data = data.join(loc_data)
 
-
-# In[79]:
-
-
-data.head()
 
 
 # ### The cleaning stage
@@ -222,10 +194,6 @@ data.head()
 #     - lat & lon
 #     - dom(subtract dt.today from date)
 # 
-
-# In[20]:
-
-
 # in case you need to lower the columns again
 #data.columns = data.columns.str.replace(' ', '_').str.lower()
 
@@ -272,15 +240,6 @@ yr = pd.DataFrame(data['yrbuilt'].str.split('/').tolist(), columns =['yrbuilt_ke
 sub = pd.DataFrame(data['sub_type'].str.split('/').tolist(), columns=['type', 'a/d'])
 
 
-# In[559]:
-
-
-bed.tail()
-
-
-# In[560]:
-
-
 # list of dataframes to join
 dfs = [data,bed,dom,sqft,yr,sub]
 data = reduce((lambda df1,df2: pd.concat([df1,df2], axis=1)), dfs)
@@ -311,7 +270,7 @@ data['price_per_sqft'] = data['price_per_square_foot'].str.replace('$','').str.r
 # In[564]:
 
 
-data = data.rename(columns ={'sqft_keep':'sqft', 'yrbuilt_keep':'yrbuilt', 's':'status', 'l/c_price':'display_price', 'price_per_square_foot': 'display_price/sqft', 'pool_private_yn':'pool', 'view_yn':'view'})
+data = data.rename(columns ={'sqft_keep':'sqft', 'yrbuilt_keep':'yrbuilt', 's':'status', 'l/c_price':'display_price', 'price_per_square_foot': 'display_price_per_sqft', 'pool_private_yn':'pool', 'view_yn':'view'})
 
 
 # In[565]:
@@ -464,8 +423,7 @@ data_clean1['view'] = data_clean1['view'].map({'Y': True, 'N': False})
 # for ease I want to be able to call address in the dash
 data_clean1['address'] = data_clean1['st#'] + ' ' + data_clean1.st_name
 
-
-# In[241]:
+data_clean1.drop(['geocode_address', 'st_name_only', 'day'])
 
 
 # upload data to csv data_for_upload[date].csv, index=False
