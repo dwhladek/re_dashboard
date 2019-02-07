@@ -30,9 +30,6 @@ for key,val in file_dict.items():
 south_oc_housing = df1.append([df2, df3,df4...], ignore_index=True)
 
 
-# In[ ]:
-
-
 south_oc_housing = df1.append([df2, df3,df4...], ignore_index=True)
 data = south_oc_housing.copy()
 
@@ -40,65 +37,37 @@ data = south_oc_housing.copy()
 # ### DELETE DUPLICATES EARLY
 # - make sure there are no index numbers in the data(nothing unique)
 
-# In[61]:
-
-
 # sometimes the df will have some variation of this
 # make sure it is deleted beofre you look for duplicates
 data.drop(['unnamed: 0'], axis=1, inplace=True)
 
 
-# In[544]:
-
-
 # check duplicates but make sure there are no index numbers when you run it(unique values)
 data.duplicated().sum(), data.duplicated(subset=['listing_id', 'contract_status_change_date']).sum()
-
-
-# In[545]:
-
 
 data.drop_duplicates(subset=['listing_id', 'contract_status_change_date'], keep='first', inplace=True)
 data = data.reset_index(drop=True)
 
 
-# In[546]:
-
-
 all_data.duplicated().sum()
 
 
-# ### Adding lat and lon columns(for graphing)
-
-# In[547]:
-
+# ### Adding lat and lon columns(for mapping)
 
 data.city.replace({'MV' : 'Mission Viejo', 'RSM': 'Rancho Santa Margarita', 'LD': 'Ladera Ranch', 'RMV': 'Rancho Mission Viejo', 'TC': 'Trabuco Canyon'}, inplace=True)
 
 
-# In[548]:
-
-
 data.city.value_counts()
-
-
-# In[549]:
 
 
 # create column with state filled in with CA(this is for the geocode api call)
 data['state'] = 'CA'
 
 
-# In[67]:
-
-
 # since the api call does not worth with condo numbers
 # need to create a new column to pull from(want to keep the condo number in original address for later)
 # here we are saying replace any numbers with nothing and replace any instance of # with nothing
 data['st_name_only'] = data['st_name'].str.replace('\d+', '').str.replace('\#','')
-
-
-# In[68]:
 
 
 # strip st_name of trailing whitespace
@@ -109,15 +78,9 @@ geocode_cols = list(['st#', 'st_name_only','city','state'])
 data['geocode_address'] = data[geocode_cols].apply(lambda x: '+'.join(x.astype(str)), axis=1)
 
 
-# In[69]:
-
 
 # replace whitespace with a '+'
 data['geocode_address'] = data['geocode_address'].str.replace(' ','+')
-
-
-# In[72]:
-
 
 # code good for now. dont want to repeat it
 import requests
@@ -161,16 +124,7 @@ geo_data['loc']
 loc_data = pd.DataFrame(geo_data['loc'], columns=['lat', 'lon'])
 loc_data.head()
 
-
-
-# join the lats and lons to the master df
-data.join(loc_data)
-
-
-
-# if the above works do it for real
 data = data.join(loc_data)
-
 
 
 # ### The cleaning stage
@@ -198,9 +152,6 @@ data = data.join(loc_data)
 #data.columns = data.columns.str.replace(' ', '_').str.lower()
 
 
-# In[14]:
-
-
 #all_data['is_duplicate'] = all_data.duplicated(subset=['listing_id'])
 #all_data['is_duplicate'].value_counts()
 #data.loc[(data.is_duplicate) == True]
@@ -216,9 +167,6 @@ data = data.join(loc_data)
 #         - mls area
 #         - slc
 
-# In[551]:
-
-
 data.drop(['ac/lsqft', 'bac', 'lsqft/ac', 'mls', 'mls_area', 'slc'], axis=1, inplace=True)
 
 
@@ -228,9 +176,6 @@ data.drop(['ac/lsqft', 'bac', 'lsqft/ac', 'mls', 'mls_area', 'slc'], axis=1, inp
 #     - sqft split at / and take [0]
 #     - yr built split at / and take [0]
 #     - sub type split at / and take both. both type and the A/D are important(attached/detached)
-
-# In[558]:
-
 
 # splitting up all the things that need to be split. creating sep dataframes out oft hem
 bed = pd.DataFrame(data['br/ba'].str.split('/').tolist(), columns =['bed','bath'])
@@ -245,20 +190,10 @@ dfs = [data,bed,dom,sqft,yr,sub]
 data = reduce((lambda df1,df2: pd.concat([df1,df2], axis=1)), dfs)
 
 
-# In[561]:
-
-
 data.tail()
-
-
-# In[562]:
-
 
 # drop the columns we dont need anymore
 data.drop(data[['sub_type', 'br/ba', 'sqft', 'dom/cdom', 'yrbuilt', 'delete1', 'delete2','cdom' ]], axis=1, inplace=True)
-
-
-# In[563]:
 
 
 #need to strip price and price_sqft to get rid of the '$'
@@ -266,23 +201,12 @@ data['price'] = data['l/c_price'].str.replace('$','')
 data['price'] = data['price'].str.replace(',','')
 data['price_per_sqft'] = data['price_per_square_foot'].str.replace('$','').str.replace(',','')
 
-
-# In[564]:
-
-
 data = data.rename(columns ={'sqft_keep':'sqft', 'yrbuilt_keep':'yrbuilt', 's':'status', 'l/c_price':'display_price', 'price_per_square_foot': 'display_price_per_sqft', 'pool_private_yn':'pool', 'view_yn':'view'})
-
-
-# In[565]:
-
 
 def to_numeric(df,cols):
     for col in cols:
         df[col] = pd.to_numeric(df[col])
 to_numeric(data, ['yrbuilt', 'sqft', 'dom', 'bed', 'price', 'price_per_sqft'])
-
-
-# In[566]:
 
 
 # what else to do
@@ -296,15 +220,8 @@ to_numeric(data, ['yrbuilt', 'sqft', 'dom', 'bed', 'price', 'price_per_sqft'])
     # - pool_private_yn
 # 5. Check datatypes
 
-
-# In[690]:
-
-
 #checkpoint
 data_clean1 = data.copy()
-
-
-# In[691]:
 
 
 # 1. split date up and get a year, month, day column
@@ -312,17 +229,10 @@ dates = pd.DataFrame(data_clean1['contract_status_change_date'].str.split('/').t
 #combine the dataframe created above to the master df
 data_clean1 = pd.concat([data_clean1,dates], axis=1)
 
-
-# In[692]:
-
-
 # 2. change to datetime so we can do functions like max, etc on it
 data_clean1['contract_status_change_date'] = pd.to_datetime(data_clean1.contract_status_change_date)
 # get day of week for analysis
 data_clean1['day_of_week'] = data_clean1.contract_status_change_date.dt.weekday_name
-
-
-# In[693]:
 
 
 # 3. split baths up into full, 3/4, 1/2, 1/4
@@ -342,24 +252,14 @@ data_clean1['bath'] = round(data_clean1['full_bath'] + data_clean1['3/4_bath'] +
 data_clean1.drop(data_clean1[['full_bath', '3/4_bath', '1/2_bath', '1/4_bath']], axis=1, inplace=True)
 
 
-# In[ ]:
-
-
 #changing years to 2000s
 data_clean1['year'] = data_clean1['year'].replace({18:2018, 16:2016, 17:2017, 15:2015, 19:2019})
-
-
-# In[694]:
 
 
 # 4. fill in nans for:
     # - a/d
     # - view_yn
     # - pool_private_yn
-
-
-# In[695]:
-
 
 # fill in nans a/d
 data_clean1['a/d'] = np.where((data_clean1['a/d'].isnull()) & (data_clean1['type'] =='SFR'), 'D', data_clean1['a/d'])
@@ -370,28 +270,12 @@ data_clean1['view'] = np.where(data_clean1.view.isnull(), 'N', data_clean1['view
 data_clean1['pool'] = np.where(data_clean1.pool.isnull(), 'N', data_clean1['pool'])
 
 
-# In[696]:
-
-
-data_clean1.head()
-
-
-# In[697]:
-
-
 # Changing Datatypes
 # month day and year to numeric
 # pool and view to bool
 # status, type, a/d, to category
 
-
-# In[ ]:
-
-
 data.month.replace({1: 'Jan', 2:'Feb', 3:'Mar', 4:'Apr', 5:'May', 6:'Jun', 7: 'Jul',8:'Aug', 9:'Sep', 10:'Oct', 11:'Nov', 12:'Dec'}, inplace=True)
-
-
-# In[698]:
 
 
 # month day and year to numeric
