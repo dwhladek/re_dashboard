@@ -1,10 +1,4 @@
-
-# coding: utf-8
-
 # # Geocoding, cleaning
-
-# In[1]:
-
 
 import numpy as np
 import glob
@@ -307,7 +301,7 @@ data_clean1['view'] = data_clean1['view'].map({'Y': True, 'N': False})
 # for ease I want to be able to call address in the dash
 data_clean1['address'] = data_clean1['st#'] + ' ' + data_clean1.st_name
 
-data_clean1.drop(['geocode_address', 'st_name_only', 'day'], axis=1, inplace=True)
+data_clean1.drop(['geocode_address', 'st_name_only', 'day', 'st#', 'st_name'], axis=1, inplace=True)
 
 
 # upload data to csv data_for_upload[date].csv, index=False
