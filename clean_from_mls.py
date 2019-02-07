@@ -132,7 +132,7 @@ import requests
 #url initialized
 url = 'https://maps.googleapis.com/maps/api/geocode/json?address='
 # my PRIVATE api key
-api = '&key=AIzaSyB5rMou_BzY_HF2_P881r34MdJCqjE97J8'
+api = '######'
 #column to iterate over
 col = data['geocode_address']
 # dictionary to store lats and lons
