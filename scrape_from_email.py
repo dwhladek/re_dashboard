@@ -32,22 +32,17 @@ if status != 'OK':
   
   exit()
 
-print (messages)
-
 # getting the ids for the emails that were received today. 
 # needs to be in this format 
-#yesterday = (date.today() - timedelta(1)).strftime('%d-%b-%Y')
 df_date = date.today().strftime('%m/%d/%Y')
 date = date.today().strftime('%d-%b-%Y')
 resp, items = m.search(None, '(SENTON {date})'.format(date=date))
 items = items[0].split()
-#items = b','.join(items[0].split())
 items
 
 # looping over the emails we searched for above
 props =[] 
 for emailid in items:
-  #temp_dict={}
   # fetching the items based on 
   resp, data = m.uid('fetch', emailid, '(RFC822)')
   email_body = data[0][1]
@@ -69,7 +64,6 @@ for item in props:
 for i in range(len(price)):
   alls.append([tag.text for tag in price[i]])
 
-#date = date.today().strftime('%d-%b-%Y')
 prop_dict={}
 prop_dict['data']=[]
 for i in range(len(alls)):
@@ -91,7 +85,8 @@ for i in range(len(alls)):
 
 props = pd.DataFrame(prop_dict['data'],columns=['full_address', 'display_price', 'listing_id', 'status', 'sqft_all', 'bed', 'bath', 'pool', 'view', 'yrbuilt', 'type', 'contract_status_change_date', 'state'])
 
-
+#checkpoint
+props1 = props.copy()
 
 #strip whitepspace
 props1 = props1.applymap(lambda x: x.strip())
@@ -145,6 +140,7 @@ for i in range(len(col)):
     })
 
 loc_data = pd.DataFrame(geo_data['loc'], columns=['lat', 'lon'])
+#add the lat and lon columns to my df
 props1 = props1.join(loc_data)
 
 props1['price'] = pd.to_numeric(props['display_price'].str.replace('$', '').str.replace(',',''))
@@ -172,12 +168,14 @@ def to_bool(df, cols):
     
 to_bool(props2, ['pool', 'view'])
 
+#drop the unnecessary columns(basically columns that were used to create the necessary columns)
 props2.drop(['sqft_all', 'st#', 'st_name_only', 'geocode_address', 'full_address'], axis=1, inplace=True)
 
-# now we can send props2 to database
-
+#TO DO!
 # filler. need to figure out how to keep dom updated. its an important metric
+# for now we will leave at 1. as a filler. 
 props2['dom'] = 1
 
-props2
+
+# now we can send this df to database
 
