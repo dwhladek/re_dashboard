@@ -207,8 +207,6 @@ data['year'] = pd.to_numeric(data.contract_status_change_date.dt.year)
 
 # 2. split baths up into full, 3/4, 1/2, 1/4
 data_clean1[['full_bath','3/4_bath', '1/2_bath', '1/4_bath']] = pd.DataFrame(data_clean1['bath'].str.split(',').tolist())
-data_clean1.dropna(subset=['bath'], inplace=True)
-data_clean1 = data_clean1.join([baths])
 del data_clean1['bath']
 # replace with necessary values so we can add them accurately
 data_clean1['3/4_bath'] = data_clean1['3/4_bath'].replace(1,.75)
