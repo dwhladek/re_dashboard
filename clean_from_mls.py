@@ -14,8 +14,8 @@ import io
 import seaborn as sns
 
 # needed to upload csv to colab
-from google.colab import files
-uploaded = files.upload()
+#from google.colab import files
+#uploaded = files.upload()
 
 # for single 
 data = pd.read_csv('data_for_upload_01-13-19.csv')
@@ -27,10 +27,10 @@ file_dict= {i: pd.read_csv(i) for i in filenames}
 for key,val in file_dict.items():
     exec(key[:-4] + '=val')
     
-south_oc_housing = df1.append([df2, df3,df4...], ignore_index=True)
+#south_oc_housing = df1.append([df2, df3,df4...], ignore_index=True)
 
-south_oc_housing = df1.append([df2, df3,df4...], ignore_index=True)
-data = south_oc_housing.copy()
+#south_oc_housing = df1.append([df2, df3,df4...], ignore_index=True)
+#data = south_oc_housing.copy()
 
 """### DELETE DUPLICATES EARLY
 - make sure there are no index numbers in the data(nothing unique)
